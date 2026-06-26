@@ -1,4 +1,4 @@
-import { createProjectService } from '../services/projectService.js';
+import { createProjectService, getProjectTreeService } from '../services/projectService.js';
 
 export const createProject = async (req, res) => {
     try {
@@ -11,6 +11,27 @@ export const createProject = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             message: 'Failed to create project',
+            error: error.message,
+        });
+    }
+};
+
+export const getProjectTree = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const tree = await getProjectTreeService(projectId);
+
+        if (!tree) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Project tree fetched successfully',
+            data: tree,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Failed to fetch project tree',
             error: error.message,
         });
     }
