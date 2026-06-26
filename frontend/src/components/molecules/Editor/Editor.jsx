@@ -4,6 +4,7 @@ import Editor from '@monaco-editor/react';
 export const EditorComponent = ({
     height = '80vh',
     width = '100%',
+    language,
     defaultLanguage = 'javascript',
     defaultValue = '// Start coding...',
     fontFamily = 'JetBrains Mono, monospace',
@@ -41,6 +42,7 @@ export const EditorComponent = ({
         <Editor
             height={height}
             width={width}
+            language={language}
             defaultLanguage={defaultLanguage}
             defaultValue={defaultValue}
             onMount={handleEditorMount}

@@ -1,0 +1,31 @@
+.editor-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #21222c;
+    border-right: 1px solid #191a21;
+    border-top: 2px solid transparent;
+    user-select: none;
+}
+
+.editor-tab--active {
+    background: #282a36;
+    border-top: 2px solid #ff79c6;
+}
+
+.editor-tab__close {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: #6272a4;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 4px;
+}
+
+.editor-tab__close:hover {
+    color: #f8f8f2;
+    background: #44475a;
+}
