@@ -1,0 +1,34 @@
+.file-tree {
+    padding: 8px 0;
+    font-size: 13px;
+    color: #f8f8f2;
+    user-select: none;
+}
+
+.file-tree__status {
+    padding: 16px;
+    color: #6272a4;
+    font-size: 13px;
+}
+
+.tree-node__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tree-node__label:hover {
+    background: #44475a;
+}
+
+.tree-node__label--active {
+    background: #44475a;
+    color: #ff79c6;
+}
+
+.tree-node__children {
+    padding-left: 14px;
+}

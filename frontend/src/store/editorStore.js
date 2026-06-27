@@ -1,13 +1,8 @@
 import { create } from 'zustand';
 
 export const useEditorStore = create((set) => ({
-    // TODO(phase6): seed is temporary so tabs are visible now; the directory
-    // tree will populate openFiles by opening files on click.
-    openFiles: [
-        { path: '/demo/App.jsx', name: 'App.jsx', extension: 'jsx' },
-        { path: '/demo/index.css', name: 'index.css', extension: 'css' },
-    ],
-    activeFile: { path: '/demo/App.jsx', name: 'App.jsx', extension: 'jsx' },
+    openFiles: [],
+    activeFile: null,
 
     setActiveFile: (file) => set({ activeFile: file }),
 
