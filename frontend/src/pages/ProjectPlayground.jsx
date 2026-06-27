@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { io } from 'socket.io-client';
 
 import { useEditorStore } from '../store/editorStore';
+import { useEditorSocketStore } from '../store/editorSocketStore';
 import { FileTree } from '../components/organisms/FileTree/FileTree';
 import { EditorTabs } from '../components/organisms/EditorTabs/EditorTabs';
 import { EditorComponent } from '../components/molecules/Editor/Editor';
@@ -10,6 +13,21 @@ export const ProjectPlayground = () => {
     const { projectId } = useParams();
     const activeFile = useEditorStore((state) => state.activeFile);
     const language = activeFile ? getEditorLanguage(activeFile.extension) : 'javascript';
+
+    const setEditorSocket = useEditorSocketStore((state) => state.setEditorSocket);
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        const editorSocketConnection = io(`${import.meta.env.VITE_BACKEND_URL}/editor`, {
+            query: { projectId },
+        });
+        setEditorSocket(editorSocketConnection);
+
+        return () => {
+            editorSocketConnection.disconnect();
+        };
+    }, [projectId, setEditorSocket]);
 
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
