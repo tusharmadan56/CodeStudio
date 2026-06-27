@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import chokidar from 'chokidar';
 
-import { PORT } from './config/serverConfig.js';
+import { PORT, PROJECTS_DIR } from './config/serverConfig.js';
 import projectRoutes from './routes/projectRoutes.js';
 
 const app = express();
@@ -27,8 +29,27 @@ const editorNamespace = io.of('/editor');
 editorNamespace.on('connection', (socket) => {
     console.log('Editor socket connected', socket.id);
 
-    socket.on('disconnect', () => {
+    const projectId = socket.handshake.query.projectId;
+    let watcher;
+
+    if (projectId) {
+        watcher = chokidar.watch(path.join(PROJECTS_DIR, projectId), {
+            ignored: (filePath) => filePath.includes('node_modules'),
+            persistent: true,
+            awaitWriteFinish: { stabilityThreshold: 2000 },
+            ignoreInitial: true,
+        });
+
+        watcher.on('all', (event, filePath) => {
+            console.log('File event:', event, filePath);
+        });
+    }
+
+    socket.on('disconnect', async () => {
         console.log('Editor socket disconnected', socket.id);
+        if (watcher) {
+            await watcher.close();
+        }
     });
 });
 
