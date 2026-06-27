@@ -7,6 +7,7 @@ import chokidar from 'chokidar';
 
 import { PORT, PROJECTS_DIR } from './config/serverConfig.js';
 import projectRoutes from './routes/projectRoutes.js';
+import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
 
 const app = express();
 const server = createServer(app);
@@ -44,6 +45,8 @@ editorNamespace.on('connection', (socket) => {
             console.log('File event:', event, filePath);
         });
     }
+
+    handleEditorSocketEvents(socket);
 
     socket.on('disconnect', async () => {
         console.log('Editor socket disconnected', socket.id);
