@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
@@ -40,6 +40,22 @@ export const ProjectPlayground = () => {
         return () => editorSocket.off('readFileSuccess', handleReadFileSuccess);
     }, [editorSocket, setFileContent]);
 
+    const saveTimerRef = useRef(null);
+
+    //  keep the in-memory value live on every keystroke, but only
+    // hit the disk once typing pauses to avoid a write per character.
+    const handleEditorChange = (value) => {
+        if (!activeFile) return;
+        setFileContent(activeFile.path, value);
+
+        if (!editorSocket) return;
+        const pathToFileOrFolder = activeFile.path;
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(() => {
+            editorSocket.emit('writeFile', { pathToFileOrFolder, data: value });
+        }, 1000);
+    };
+
     const editorValue = activeFile ? activeFile.value ?? '' : '// Open a file to start editing';
 
     return (
@@ -50,7 +66,12 @@ export const ProjectPlayground = () => {
 
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <EditorTabs />
-                <EditorComponent language={language} value={editorValue} height="calc(100vh - 38px)" />
+                <EditorComponent
+                    language={language}
+                    value={editorValue}
+                    onChange={handleEditorChange}
+                    height="calc(100vh - 38px)"
+                />
             </main>
         </div>
     );
