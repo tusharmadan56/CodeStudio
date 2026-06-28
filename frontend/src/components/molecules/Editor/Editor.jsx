@@ -6,7 +6,7 @@ export const EditorComponent = ({
     width = '100%',
     language,
     defaultLanguage = 'javascript',
-    defaultValue = '// Start coding...',
+    value,
     fontFamily = 'JetBrains Mono, monospace',
     fontSize = 14,
 }) => {
@@ -44,7 +44,7 @@ export const EditorComponent = ({
             width={width}
             language={language}
             defaultLanguage={defaultLanguage}
-            defaultValue={defaultValue}
+            value={value}
             onMount={handleEditorMount}
             options={{ fontFamily, fontSize, minimap: { enabled: true } }}
         />
