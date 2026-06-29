@@ -8,6 +8,7 @@ import { useEditorSocketStore } from '../store/editorSocketStore';
 import { FileTree } from '../components/organisms/FileTree/FileTree';
 import { EditorTabs } from '../components/organisms/EditorTabs/EditorTabs';
 import { EditorComponent } from '../components/molecules/Editor/Editor';
+import { BrowserTerminal } from '../components/molecules/Terminal/BrowserTerminal';
 import { getEditorLanguage } from '../utils/getEditorLanguage';
 
 export const ProjectPlayground = () => {
@@ -98,8 +99,11 @@ export const ProjectPlayground = () => {
                     language={language}
                     value={editorValue}
                     onChange={handleEditorChange}
-                    height="calc(100vh - 38px)"
+                    height="calc(70vh - 38px)"
                 />
+                <div style={{ height: '30vh', borderTop: '1px solid #44475a' }}>
+                    <BrowserTerminal />
+                </div>
             </main>
         </div>
     );

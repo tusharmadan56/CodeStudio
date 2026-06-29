@@ -1,0 +1,8 @@
+.terminal {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: #21222c;
+    padding: 4px;
+    box-sizing: border-box;
+}
