@@ -31,4 +31,17 @@ export const useEditorStore = create((set) => ({
                 activeFile: closingActive ? openFiles.at(-1) ?? null : state.activeFile,
             };
         }),
+
+    // Close the tab for a deleted file, or every tab under a deleted folder.
+    closeFilesUnder: (target) =>
+        set((state) => {
+            const isUnder = (p) =>
+                p === target || p.startsWith(`${target}/`) || p.startsWith(`${target}\\`);
+            const openFiles = state.openFiles.filter((f) => !isUnder(f.path));
+            const activeStillOpen = state.activeFile && !isUnder(state.activeFile.path);
+            return {
+                openFiles,
+                activeFile: activeStillOpen ? state.activeFile : openFiles.at(-1) ?? null,
+            };
+        }),
 }));

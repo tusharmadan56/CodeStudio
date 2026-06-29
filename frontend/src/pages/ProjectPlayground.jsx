@@ -18,6 +18,7 @@ export const ProjectPlayground = () => {
     const setEditorSocket = useEditorSocketStore((state) => state.setEditorSocket);
     const editorSocket = useEditorSocketStore((state) => state.editorSocket);
     const setFileContent = useEditorStore((state) => state.setFileContent);
+    const closeFilesUnder = useEditorStore((state) => state.closeFilesUnder);
     const queryClient = useQueryClient();
 
     useEffect(() => {
@@ -44,23 +45,28 @@ export const ProjectPlayground = () => {
         // any structural change to the project refreshes the file tree
         const refreshTree = () =>
             queryClient.invalidateQueries({ queryKey: ['projectTree', projectId] });
+        // a deleted file/folder must also drop any open tabs pointing into it
+        const handleDeleteSuccess = (data) => {
+            if (data?.path) closeFilesUnder(data.path);
+            refreshTree();
+        };
 
         editorSocket.on('readFileSuccess', handleReadFileSuccess);
         editorSocket.on('writeFileSuccess', handleWriteFileSuccess);
         editorSocket.on('createFileSuccess', refreshTree);
-        editorSocket.on('deleteFileSuccess', refreshTree);
+        editorSocket.on('deleteFileSuccess', handleDeleteSuccess);
         editorSocket.on('createFolderSuccess', refreshTree);
-        editorSocket.on('deleteFolderSuccess', refreshTree);
+        editorSocket.on('deleteFolderSuccess', handleDeleteSuccess);
 
         return () => {
             editorSocket.off('readFileSuccess', handleReadFileSuccess);
             editorSocket.off('writeFileSuccess', handleWriteFileSuccess);
             editorSocket.off('createFileSuccess', refreshTree);
-            editorSocket.off('deleteFileSuccess', refreshTree);
+            editorSocket.off('deleteFileSuccess', handleDeleteSuccess);
             editorSocket.off('createFolderSuccess', refreshTree);
-            editorSocket.off('deleteFolderSuccess', refreshTree);
+            editorSocket.off('deleteFolderSuccess', handleDeleteSuccess);
         };
-    }, [editorSocket, setFileContent, queryClient, projectId]);
+    }, [editorSocket, setFileContent, closeFilesUnder, queryClient, projectId]);
 
     const saveTimerRef = useRef(null);
 

@@ -65,7 +65,7 @@ export const handleEditorSocketEvents = (socket) => {
         if (rejectIfOutside('deleteFileError', pathToFileOrFolder)) return;
         try {
             await fs.unlink(pathToFileOrFolder);
-            socket.emit('deleteFileSuccess', { data: 'File deleted successfully' });
+            socket.emit('deleteFileSuccess', { data: 'File deleted successfully', path: pathToFileOrFolder });
         } catch (error) {
             console.log('Error deleting the file', error);
             socket.emit('deleteFileError', { data: 'Error deleting the file' });
@@ -87,7 +87,7 @@ export const handleEditorSocketEvents = (socket) => {
         if (rejectIfOutside('deleteFolderError', pathToFileOrFolder)) return;
         try {
             await fs.rm(pathToFileOrFolder, { recursive: true });
-            socket.emit('deleteFolderSuccess', { data: 'Folder deleted successfully' });
+            socket.emit('deleteFolderSuccess', { data: 'Folder deleted successfully', path: pathToFileOrFolder });
         } catch (error) {
             console.log('Error deleting the folder', error);
             socket.emit('deleteFolderError', { data: 'Error deleting the folder' });
