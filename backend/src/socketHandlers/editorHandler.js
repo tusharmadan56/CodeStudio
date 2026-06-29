@@ -24,7 +24,8 @@ export const handleEditorSocketEvents = (socket) => {
         if (rejectIfOutside('writeFileError', pathToFileOrFolder)) return;
         try {
             await fs.writeFile(pathToFileOrFolder, data);
-            socket.emit('writeFileSuccess', { data: 'File written successfully' });
+            // notify every OTHER editor client so they can sync the same file live
+            socket.broadcast.emit('writeFileSuccess', { path: pathToFileOrFolder, value: data });
         } catch (error) {
             console.log('Error writing the file', error);
             socket.emit('writeFileError', { data: 'Error writing the file' });

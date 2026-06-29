@@ -35,9 +35,17 @@ export const ProjectPlayground = () => {
         if (!editorSocket) return;
 
         const handleReadFileSuccess = (data) => setFileContent(data.path, data.value);
+        // another client edited a file we may have open — update it live
+        const handleWriteFileSuccess = (data) => {
+            if (data?.path) setFileContent(data.path, data.value);
+        };
         editorSocket.on('readFileSuccess', handleReadFileSuccess);
+        editorSocket.on('writeFileSuccess', handleWriteFileSuccess);
 
-        return () => editorSocket.off('readFileSuccess', handleReadFileSuccess);
+        return () => {
+            editorSocket.off('readFileSuccess', handleReadFileSuccess);
+            editorSocket.off('writeFileSuccess', handleWriteFileSuccess);
+        };
     }, [editorSocket, setFileContent]);
 
     const saveTimerRef = useRef(null);
