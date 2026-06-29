@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 
 import { useEditorStore } from '../store/editorStore';
@@ -17,6 +18,7 @@ export const ProjectPlayground = () => {
     const setEditorSocket = useEditorSocketStore((state) => state.setEditorSocket);
     const editorSocket = useEditorSocketStore((state) => state.editorSocket);
     const setFileContent = useEditorStore((state) => state.setFileContent);
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         if (!projectId) return;
@@ -39,14 +41,26 @@ export const ProjectPlayground = () => {
         const handleWriteFileSuccess = (data) => {
             if (data?.path) setFileContent(data.path, data.value);
         };
+        // any structural change to the project refreshes the file tree
+        const refreshTree = () =>
+            queryClient.invalidateQueries({ queryKey: ['projectTree', projectId] });
+
         editorSocket.on('readFileSuccess', handleReadFileSuccess);
         editorSocket.on('writeFileSuccess', handleWriteFileSuccess);
+        editorSocket.on('createFileSuccess', refreshTree);
+        editorSocket.on('deleteFileSuccess', refreshTree);
+        editorSocket.on('createFolderSuccess', refreshTree);
+        editorSocket.on('deleteFolderSuccess', refreshTree);
 
         return () => {
             editorSocket.off('readFileSuccess', handleReadFileSuccess);
             editorSocket.off('writeFileSuccess', handleWriteFileSuccess);
+            editorSocket.off('createFileSuccess', refreshTree);
+            editorSocket.off('deleteFileSuccess', refreshTree);
+            editorSocket.off('createFolderSuccess', refreshTree);
+            editorSocket.off('deleteFolderSuccess', refreshTree);
         };
-    }, [editorSocket, setFileContent]);
+    }, [editorSocket, setFileContent, queryClient, projectId]);
 
     const saveTimerRef = useRef(null);
 

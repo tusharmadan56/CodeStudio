@@ -1,5 +1,6 @@
 import { useProjectTree } from '../../../hooks/apis/useProjectTree';
 import { TreeNode } from './TreeNode';
+import { ContextMenu } from '../../molecules/ContextMenu/ContextMenu';
 import './FileTree.css';
 
 export const FileTree = ({ projectId }) => {
@@ -21,6 +22,7 @@ export const FileTree = ({ projectId }) => {
     return (
         <div className="file-tree">
             <TreeNode node={tree} />
+            <ContextMenu />
         </div>
     );
 };

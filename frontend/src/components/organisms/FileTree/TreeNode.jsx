@@ -3,14 +3,24 @@ import { VscChevronDown, VscChevronRight, VscFile } from 'react-icons/vsc';
 
 import { useEditorStore } from '../../../store/editorStore';
 import { useEditorSocketStore } from '../../../store/editorSocketStore';
+import { useContextMenuStore } from '../../../store/contextMenuStore';
 
 export const TreeNode = ({ node }) => {
     const [expanded, setExpanded] = useState(false);
     const openFile = useEditorStore((state) => state.openFile);
     const activeFile = useEditorStore((state) => state.activeFile);
     const editorSocket = useEditorSocketStore((state) => state.editorSocket);
+    const openContextMenu = useContextMenuStore((state) => state.open);
 
     const isFolder = Array.isArray(node.children);
+
+    const handleContextMenu = (e) => {
+        e.preventDefault();
+        openContextMenu(e.clientX, e.clientY, {
+            path: node.path,
+            type: isFolder ? 'folder' : 'file',
+        });
+    };
 
     const handleClick = () => {
         if (isFolder) {
@@ -32,6 +42,7 @@ export const TreeNode = ({ node }) => {
             <div
                 className={`tree-node__label ${isActiveFile ? 'tree-node__label--active' : ''}`}
                 onClick={handleClick}
+                onContextMenu={handleContextMenu}
             >
                 {isFolder ? (
                     expanded ? <VscChevronDown /> : <VscChevronRight />
