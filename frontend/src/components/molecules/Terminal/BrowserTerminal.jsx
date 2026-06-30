@@ -5,11 +5,13 @@ import { FitAddon } from '@xterm/addon-fit';
 import { io } from 'socket.io-client';
 import '@xterm/xterm/css/xterm.css';
 import './BrowserTerminal.css';
+import { usePreviewStore } from '../../../store/previewStore';
 
 export const BrowserTerminal = () => {
     const { projectId } = useParams();
     const terminalRef = useRef(null);
     const socketRef = useRef(null);
+    const setPreviewUrl = usePreviewStore((state) => state.setUrl);
 
     useEffect(() => {
         const term = new Terminal({
@@ -32,6 +34,8 @@ export const BrowserTerminal = () => {
 
         // backend → terminal
         socket.on('shell:output', (data) => term.write(data));
+        // backend tells us which host port the container's dev server is mapped to
+        socket.on('preview:url', (data) => setPreviewUrl(data.url));
         // terminal → backend
         term.onData((data) => socket.emit('shell:input', data));
 
@@ -39,7 +43,7 @@ export const BrowserTerminal = () => {
             socket.disconnect();
             term.dispose();
         };
-    }, [projectId]);
+    }, [projectId, setPreviewUrl]);
 
     return <div className="terminal" ref={terminalRef} />;
 };

@@ -9,6 +9,23 @@ import { PROJECTS_DIR, SCAFFOLD_CMD } from '../config/serverConfig.js';
 
 const SAFE_PROJECT_ID = /^[a-zA-Z0-9-]+$/;
 
+// host:true → dev server binds 0.0.0.0 (reachable through the container port mapping)
+// strictPort+port → stays on 5173, the port we map for preview
+// usePolling → detect host edits across the Docker bind mount (HMR)
+const VITE_CONFIG = `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+    plugins: [react()],
+    server: {
+        host: true,
+        port: 5173,
+        strictPort: true,
+        watch: { usePolling: true },
+    },
+});
+`;
+
 export const createProjectService = async () => {
     const projectId = uuid4();
     const projectPath = path.join(PROJECTS_DIR, projectId);
@@ -17,6 +34,9 @@ export const createProjectService = async () => {
 
     const command = SCAFFOLD_CMD.replace('{{projectName}}', projectId);
     await execPromisified(command, { cwd: projectPath });
+
+    // overwrite the scaffolded config so the dev server is reachable + hot-reloads in the container
+    await fs.writeFile(path.join(projectPath, projectId, 'vite.config.js'), VITE_CONFIG);
 
     return projectId;
 };

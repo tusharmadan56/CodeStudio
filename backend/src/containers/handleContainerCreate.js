@@ -46,6 +46,13 @@ export const handleContainerCreate = async (projectId, socket) => {
 
     await container.start();
 
+    // Docker assigns a random host port to the container's 5173 — tell the frontend so it can preview.
+    const info = await container.inspect();
+    const hostPort = info.NetworkSettings?.Ports?.['5173/tcp']?.[0]?.HostPort;
+    if (hostPort) {
+        socket.emit('preview:url', { url: `http://localhost:${hostPort}` });
+    }
+
     const exec = await container.exec({
         Cmd: ['/bin/bash'],
         AttachStdin: true,

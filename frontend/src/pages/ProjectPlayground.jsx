@@ -9,6 +9,7 @@ import { FileTree } from '../components/organisms/FileTree/FileTree';
 import { EditorTabs } from '../components/organisms/EditorTabs/EditorTabs';
 import { EditorComponent } from '../components/molecules/Editor/Editor';
 import { BrowserTerminal } from '../components/molecules/Terminal/BrowserTerminal';
+import { Preview } from '../components/molecules/Preview/Preview';
 import { getEditorLanguage } from '../utils/getEditorLanguage';
 
 export const ProjectPlayground = () => {
@@ -105,6 +106,10 @@ export const ProjectPlayground = () => {
                     <BrowserTerminal />
                 </div>
             </main>
+
+            <aside style={{ width: '40%', borderLeft: '1px solid #44475a', flexShrink: 0 }}>
+                <Preview />
+            </aside>
         </div>
     );
 };
