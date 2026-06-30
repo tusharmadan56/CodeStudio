@@ -8,6 +8,7 @@ import chokidar from 'chokidar';
 import { PORT, PROJECTS_DIR } from './config/serverConfig.js';
 import projectRoutes from './routes/projectRoutes.js';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
+import { handleContainerCreate, cleanupSandboxContainers } from './containers/handleContainerCreate.js';
 
 const app = express();
 const server = createServer(app);
@@ -57,19 +58,40 @@ editorNamespace.on('connection', (socket) => {
 });
 
 const terminalNamespace = io.of('/terminal');
-terminalNamespace.on('connection', (socket) => {
+terminalNamespace.on('connection', async (socket) => {
     console.log('Terminal socket connected', socket.id);
 
+    const projectId = socket.handshake.query.projectId;
+    let container;
+    let disconnected = false;
+
+    const removeContainer = async () => {
+        if (!container) return;
+        try {
+            await container.remove({ force: true });
+        } catch (error) {
+            console.log('Error removing the container', error);
+        }
+        container = undefined;
+    };
+
+    // Register cleanup first so a disconnect during container startup isn't missed
     
-    socket.on('shell:input', (data) => {
-        socket.emit('shell:output', data);
+    socket.on('disconnect', async () => {
+        console.log('Terminal socket disconnected', socket.id);
+        disconnected = true;
+        await removeContainer();
     });
 
-    socket.on('disconnect', () => {
-        console.log('Terminal socket disconnected', socket.id);
-    });
+    try {
+        container = await handleContainerCreate(projectId, socket);
+        if (disconnected) await removeContainer(); // socket already left while starting up
+    } catch (error) {
+        console.log('Error creating the container', error);
+    }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+    await cleanupSandboxContainers();
 });
