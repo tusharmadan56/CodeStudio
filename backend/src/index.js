@@ -1,12 +1,14 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import chokidar from 'chokidar';
 
-import { PORT, PROJECTS_DIR } from './config/serverConfig.js';
+import { PORT, PROJECTS_DIR, CLIENT_ORIGIN } from './config/serverConfig.js';
 import projectRoutes from './routes/projectRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
 import { handleContainerCreate, cleanupSandboxContainers } from './containers/handleContainerCreate.js';
 
@@ -19,12 +21,14 @@ const io = new Server(server, {
 
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(cors());
+app.use(cors({ origin: CLIENT_ORIGIN, credentials: true })); // credentials: allow the refresh-token cookie cross-origin
+app.use(cookieParser());
 
 app.get('/ping', (req, res) => {
     return res.json({ message: 'pong' });
 });
 
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/projects', projectRoutes);
 
 const editorNamespace = io.of('/editor');
