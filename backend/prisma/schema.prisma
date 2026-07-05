@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+
+  ownedProjects Project[]       @relation("ProjectOwner")
+  memberships   ProjectMember[]
+}
+
+model Project {
+  id        String   @id // set explicitly to the projects/<id>/ folder uuid, so a row maps 1:1 to a folder on disk
+  name      String
+  ownerId   String
+  owner     User     @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  members ProjectMember[]
+  shares  ProjectShare[]
+
+  @@index([ownerId])
+}
+
+// Sharing (not wired yet): access to a project = its owner OR a ProjectMember row.
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+  @@index([userId])
+}
+
+model ProjectShare {
+  id        String    @id @default(uuid())
+  projectId String
+  token     String    @unique
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([projectId])
+}
