@@ -20,7 +20,7 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true })); // credentials: allow the refresh-token cookie cross-origin
 app.use(cookieParser());
 
