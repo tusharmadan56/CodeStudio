@@ -9,6 +9,7 @@ import chokidar from 'chokidar';
 import { PORT, PROJECTS_DIR, CLIENT_ORIGIN } from './config/serverConfig.js';
 import projectRoutes from './routes/projectRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import shareRoutes from './routes/shareRoutes.js';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
 import { handleContainerCreate, cleanupSandboxContainers } from './containers/handleContainerCreate.js';
 import { requireSocketProjectAccess } from './middlewares/socketAuthMiddleware.js';
@@ -31,6 +32,7 @@ app.get('/ping', (req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/projects', projectRoutes);
+app.use('/api/v1/shares', shareRoutes);
 
 const editorNamespace = io.of('/editor');
 editorNamespace.use(requireSocketProjectAccess);
