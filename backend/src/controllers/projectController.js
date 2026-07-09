@@ -1,4 +1,8 @@
-import { createProjectService, getProjectTreeService } from '../services/projectService.js';
+import {
+    createProjectService,
+    listProjectsService,
+    getProjectTreeService,
+} from '../services/projectService.js';
 
 export const createProject = async (req, res) => {
     try {
@@ -12,6 +16,22 @@ export const createProject = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             message: 'Failed to create project',
+            error: error.message,
+        });
+    }
+};
+
+export const listProjects = async (req, res) => {
+    try {
+        const projects = await listProjectsService(req.user.id);
+
+        return res.status(200).json({
+            message: 'Projects fetched successfully',
+            data: projects,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Failed to fetch projects',
             error: error.message,
         });
     }

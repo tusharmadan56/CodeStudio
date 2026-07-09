@@ -45,6 +45,21 @@ export const createProjectService = async (ownerId, name) => {
     return projectId;
 };
 
+export const listProjectsService = async (userId) => {
+    const projects = await prisma.project.findMany({
+        where: {
+            OR: [{ ownerId: userId }, { members: { some: { userId } } }],
+        },
+        select: { id: true, name: true, ownerId: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+    });
+
+    return projects.map(({ ownerId, ...project }) => ({
+        ...project,
+        role: ownerId === userId ? 'owner' : 'member',
+    }));
+};
+
 export const getProjectTreeService = async (projectId) => {
     if (!SAFE_PROJECT_ID.test(projectId)) {
         return null;
