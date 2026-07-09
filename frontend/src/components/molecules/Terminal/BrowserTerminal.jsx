@@ -6,6 +6,7 @@ import { io } from 'socket.io-client';
 import '@xterm/xterm/css/xterm.css';
 import './BrowserTerminal.css';
 import { usePreviewStore } from '../../../store/previewStore';
+import { useAuthStore } from '../../../store/authStore';
 
 export const BrowserTerminal = () => {
     const { projectId } = useParams();
@@ -29,6 +30,7 @@ export const BrowserTerminal = () => {
 
         const socket = io(`${import.meta.env.VITE_BACKEND_URL}/terminal`, {
             query: { projectId },
+            auth: { token: useAuthStore.getState().accessToken },
         });
         socketRef.current = socket;
 

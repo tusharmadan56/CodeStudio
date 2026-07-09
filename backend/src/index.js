@@ -11,6 +11,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
 import { handleContainerCreate, cleanupSandboxContainers } from './containers/handleContainerCreate.js';
+import { requireSocketProjectAccess } from './middlewares/socketAuthMiddleware.js';
 
 const app = express();
 const server = createServer(app);
@@ -32,6 +33,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/projects', projectRoutes);
 
 const editorNamespace = io.of('/editor');
+editorNamespace.use(requireSocketProjectAccess);
 editorNamespace.on('connection', (socket) => {
     console.log('Editor socket connected', socket.id);
 
@@ -62,6 +64,7 @@ editorNamespace.on('connection', (socket) => {
 });
 
 const terminalNamespace = io.of('/terminal');
+terminalNamespace.use(requireSocketProjectAccess);
 terminalNamespace.on('connection', async (socket) => {
     console.log('Terminal socket connected', socket.id);
 

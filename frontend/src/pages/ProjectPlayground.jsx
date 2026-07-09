@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 
 import { useEditorStore } from '../store/editorStore';
 import { useEditorSocketStore } from '../store/editorSocketStore';
+import { useAuthStore } from '../store/authStore';
 import { FileTree } from '../components/organisms/FileTree/FileTree';
 import { EditorTabs } from '../components/organisms/EditorTabs/EditorTabs';
 import { EditorComponent } from '../components/molecules/Editor/Editor';
@@ -28,6 +29,8 @@ export const ProjectPlayground = () => {
 
         const editorSocketConnection = io(`${import.meta.env.VITE_BACKEND_URL}/editor`, {
             query: { projectId },
+            // read at connect time, not as a hook dep — a token refresh shouldn't tear down the socket
+            auth: { token: useAuthStore.getState().accessToken },
         });
         setEditorSocket(editorSocketConnection);
 
