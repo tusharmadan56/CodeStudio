@@ -2,7 +2,8 @@ import { createProjectService, getProjectTreeService } from '../services/project
 
 export const createProject = async (req, res) => {
     try {
-        const projectId = await createProjectService();
+        const name = req.body?.name?.trim() || 'Untitled Project';
+        const projectId = await createProjectService(req.user.id, name);
 
         return res.status(201).json({
             message: 'Project created successfully',

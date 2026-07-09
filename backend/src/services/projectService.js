@@ -6,6 +6,7 @@ import directoryTree from 'directory-tree';
 
 import { execPromisified } from '../utils/execUtil.js';
 import { PROJECTS_DIR, SCAFFOLD_CMD } from '../config/serverConfig.js';
+import { prisma } from '../config/prismaClient.js';
 
 const SAFE_PROJECT_ID = /^[a-zA-Z0-9-]+$/;
 
@@ -26,7 +27,7 @@ export default defineConfig({
 });
 `;
 
-export const createProjectService = async () => {
+export const createProjectService = async (ownerId, name) => {
     const projectId = uuid4();
     const projectPath = path.join(PROJECTS_DIR, projectId);
 
@@ -37,6 +38,9 @@ export const createProjectService = async () => {
 
     // overwrite the scaffolded config so the dev server is reachable + hot-reloads in the container
     await fs.writeFile(path.join(projectPath, projectId, 'vite.config.js'), VITE_CONFIG);
+
+    // row written only after the folder scaffolds, so a Project always maps to a real folder on disk
+    await prisma.project.create({ data: { id: projectId, name, ownerId } });
 
     return projectId;
 };
