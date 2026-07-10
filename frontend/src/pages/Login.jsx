@@ -1,10 +1,11 @@
 import { Alert, Button, Card, Form, Input, Row, Typography } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useLogin } from '../hooks/apis/useLogin';
 
 export const Login = () => {
     const { mutate: login, isPending, error } = useLogin();
+    const location = useLocation();
 
     return (
         <Row justify="center" align="middle" style={{ minHeight: '100vh' }}>
@@ -38,7 +39,7 @@ export const Login = () => {
                     </Button>
                 </Form>
                 <Typography.Paragraph style={{ marginTop: 16, marginBottom: 0 }}>
-                    No account? <Link to="/signup">Sign up</Link>
+                    No account? <Link to="/signup" state={location.state}>Sign up</Link>
                 </Typography.Paragraph>
             </Card>
         </Row>

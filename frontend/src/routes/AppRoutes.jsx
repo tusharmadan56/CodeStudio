@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { CreateProject } from '../pages/CreateProject';
 import { ProjectPlayground } from '../pages/ProjectPlayground';
+import { JoinProject } from '../pages/JoinProject';
 import { Login } from '../pages/Login';
 import { Signup } from '../pages/Signup';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
@@ -24,6 +25,14 @@ export const AppRoutes = () => {
                 element={
                     <ProtectedRoute>
                         <ProjectPlayground />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/join/:token"
+                element={
+                    <ProtectedRoute>
+                        <JoinProject />
                     </ProtectedRoute>
                 }
             />

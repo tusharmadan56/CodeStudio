@@ -1,11 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
+import { Button } from 'antd';
+import { ShareAltOutlined } from '@ant-design/icons';
 
 import { useEditorStore } from '../store/editorStore';
 import { useEditorSocketStore } from '../store/editorSocketStore';
 import { useAuthStore } from '../store/authStore';
+import { useMyProjects } from '../hooks/apis/useMyProjects';
+import { ShareModal } from '../components/molecules/ShareModal/ShareModal';
 import { FileTree } from '../components/organisms/FileTree/FileTree';
 import { EditorTabs } from '../components/organisms/EditorTabs/EditorTabs';
 import { EditorComponent } from '../components/molecules/Editor/Editor';
@@ -23,6 +27,11 @@ export const ProjectPlayground = () => {
     const setFileContent = useEditorStore((state) => state.setFileContent);
     const closeFilesUnder = useEditorStore((state) => state.closeFilesUnder);
     const queryClient = useQueryClient();
+
+    const { data: myProjects } = useMyProjects();
+    const isOwner =
+        myProjects?.data?.find((project) => project.id === projectId)?.role === 'owner';
+    const [isShareOpen, setIsShareOpen] = useState(false);
 
     useEffect(() => {
         if (!projectId) return;
@@ -94,8 +103,25 @@ export const ProjectPlayground = () => {
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
             <aside style={{ width: 250, background: '#21222c', overflowY: 'auto', flexShrink: 0 }}>
+                {isOwner && (
+                    <div style={{ padding: 12 }}>
+                        <Button
+                            block
+                            icon={<ShareAltOutlined />}
+                            onClick={() => setIsShareOpen(true)}
+                        >
+                            Share
+                        </Button>
+                    </div>
+                )}
                 <FileTree projectId={projectId} />
             </aside>
+
+            <ShareModal
+                projectId={projectId}
+                open={isShareOpen}
+                onClose={() => setIsShareOpen(false)}
+            />
 
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <EditorTabs />
