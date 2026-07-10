@@ -9,7 +9,7 @@ export const Preview = () => {
     if (!url) {
         return (
             <div className="preview preview--empty">
-                Run <code>npm install &amp;&amp; npm run dev</code> in the terminal to preview your app.
+                run <code>npm install &amp;&amp; npm run dev</code> in the terminal to preview your app
             </div>
         );
     }

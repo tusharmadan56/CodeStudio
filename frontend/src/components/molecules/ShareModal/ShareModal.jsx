@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Alert, Button, Flex, Modal, Spin, Typography } from 'antd';
+import { Button, Flex, Modal, Spin, Typography } from 'antd';
 
 import { useCreateShareLink, useRevokeShareLink } from '../../../hooks/apis/useShareLink';
 
@@ -19,26 +19,25 @@ export const ShareModal = ({ projectId, open, onClose }) => {
     const shareUrl = data ? `${window.location.origin}/join/${data.token}` : null;
 
     return (
-        <Modal title="Share project" open={open} onCancel={onClose} footer={null}>
+        <Modal title="share project" open={open} onCancel={onClose} footer={null}>
             {isPending && <Spin />}
             {error && (
-                <Alert
-                    type="error"
-                    showIcon
-                    message={error.response?.data?.message ?? 'Failed to create share link'}
-                />
+                <Typography.Paragraph style={{ color: '#ff5555', fontSize: 12 }}>
+                    error:{' '}
+                    {(error.response?.data?.message ?? 'failed to create share link').toLowerCase()}
+                </Typography.Paragraph>
             )}
             {shareUrl && (
                 <Flex vertical gap="middle">
-                    <Typography.Text type="secondary">
-                        Anyone with this link can edit the project and use its terminal after
-                        signing in.
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        anyone with this link can edit the project and use its terminal after
+                        signing in
                     </Typography.Text>
                     <Typography.Text code copyable={{ text: shareUrl }}>
                         {shareUrl}
                     </Typography.Text>
                     <Button danger loading={isRevoking} onClick={() => revokeLink()}>
-                        Revoke link
+                        revoke link
                     </Button>
                 </Flex>
             )}

@@ -48,7 +48,7 @@ export const EditorComponent = ({
             value={value}
             onChange={onChange}
             onMount={handleEditorMount}
-            options={{ fontFamily, fontSize, minimap: { enabled: true } }}
+            options={{ fontFamily, fontSize, minimap: { enabled: true }, automaticLayout: true }}
         />
     );
 };
