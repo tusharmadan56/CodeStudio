@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { VscChevronDown, VscChevronRight, VscFile } from 'react-icons/vsc';
+import { VscChevronDown, VscChevronRight } from 'react-icons/vsc';
 
 import { useEditorStore } from '../../../store/editorStore';
 import { useEditorSocketStore } from '../../../store/editorSocketStore';
 import { useContextMenuStore } from '../../../store/contextMenuStore';
+import { FileIcon } from '../../../utils/getFileIcon';
 
 export const TreeNode = ({ node }) => {
     const [expanded, setExpanded] = useState(false);
@@ -47,7 +48,7 @@ export const TreeNode = ({ node }) => {
                 {isFolder ? (
                     expanded ? <VscChevronDown /> : <VscChevronRight />
                 ) : (
-                    <VscFile />
+                    <FileIcon name={node.name} />
                 )}
                 <span>{node.name}</span>
             </div>

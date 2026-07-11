@@ -6,6 +6,8 @@ export const useEditorStore = create((set) => ({
 
     setActiveFile: (file) => set({ activeFile: file }),
 
+    closeAllFiles: () => set({ openFiles: [], activeFile: null }),
+
     openFile: (file) =>
         set((state) => {
             const existing = state.openFiles.find((f) => f.path === file.path);

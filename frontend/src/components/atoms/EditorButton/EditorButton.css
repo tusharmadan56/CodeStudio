@@ -1,4 +1,7 @@
 .editor-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: transparent;
     border: none;
     color: #6272a4;

@@ -27,6 +27,7 @@ export const ProjectPlayground = () => {
     const editorSocket = useEditorSocketStore((state) => state.editorSocket);
     const setFileContent = useEditorStore((state) => state.setFileContent);
     const closeFilesUnder = useEditorStore((state) => state.closeFilesUnder);
+    const closeAllFiles = useEditorStore((state) => state.closeAllFiles);
     const queryClient = useQueryClient();
 
     const navigate = useNavigate();
@@ -47,8 +48,10 @@ export const ProjectPlayground = () => {
 
         return () => {
             editorSocketConnection.disconnect();
+            // tabs belong to this project — don't leak them into the next one
+            closeAllFiles();
         };
-    }, [projectId, setEditorSocket]);
+    }, [projectId, setEditorSocket, closeAllFiles]);
 
     useEffect(() => {
         if (!editorSocket) return;
