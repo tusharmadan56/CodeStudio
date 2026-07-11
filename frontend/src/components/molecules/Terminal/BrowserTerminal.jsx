@@ -28,6 +28,12 @@ export const BrowserTerminal = () => {
         term.open(terminalRef.current);
         fitAddon.fit();
 
+        // refit when the surrounding panel is resized by drag
+        const resizeObserver = new ResizeObserver(() => {
+            requestAnimationFrame(() => fitAddon.fit());
+        });
+        resizeObserver.observe(terminalRef.current);
+
         const socket = io(`${import.meta.env.VITE_BACKEND_URL}/terminal`, {
             query: { projectId },
             auth: { token: useAuthStore.getState().accessToken },
@@ -42,6 +48,7 @@ export const BrowserTerminal = () => {
         term.onData((data) => socket.emit('shell:input', data));
 
         return () => {
+            resizeObserver.disconnect();
             socket.disconnect();
             term.dispose();
         };

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 
-import { CreateProject } from '../pages/CreateProject';
+import { Dashboard } from '../pages/Dashboard';
 import { ProjectPlayground } from '../pages/ProjectPlayground';
 import { JoinProject } from '../pages/JoinProject';
 import { Login } from '../pages/Login';
@@ -16,7 +16,7 @@ export const AppRoutes = () => {
                 path="/"
                 element={
                     <ProtectedRoute>
-                        <CreateProject />
+                        <Dashboard />
                     </ProtectedRoute>
                 }
             />

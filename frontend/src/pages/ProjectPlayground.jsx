@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
-import { Button } from 'antd';
-import { ShareAltOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
+import { Group, Panel, Separator } from 'react-resizable-panels';
 
 import { useEditorStore } from '../store/editorStore';
 import { useEditorSocketStore } from '../store/editorSocketStore';
@@ -20,6 +20,7 @@ import { getEditorLanguage } from '../utils/getEditorLanguage';
 export const ProjectPlayground = () => {
     const { projectId } = useParams();
     const activeFile = useEditorStore((state) => state.activeFile);
+    const openFiles = useEditorStore((state) => state.openFiles);
     const language = activeFile ? getEditorLanguage(activeFile.extension) : 'javascript';
 
     const setEditorSocket = useEditorSocketStore((state) => state.setEditorSocket);
@@ -28,9 +29,10 @@ export const ProjectPlayground = () => {
     const closeFilesUnder = useEditorStore((state) => state.closeFilesUnder);
     const queryClient = useQueryClient();
 
+    const navigate = useNavigate();
     const { data: myProjects } = useMyProjects();
-    const isOwner =
-        myProjects?.data?.find((project) => project.id === projectId)?.role === 'owner';
+    const currentProject = myProjects?.data?.find((project) => project.id === projectId);
+    const isOwner = currentProject?.role === 'owner';
     const [isShareOpen, setIsShareOpen] = useState(false);
 
     useEffect(() => {
@@ -98,47 +100,111 @@ export const ProjectPlayground = () => {
         }, 1000);
     };
 
-    const editorValue = activeFile ? activeFile.value ?? '' : '// Open a file to start editing';
+    const editorValue = activeFile?.value ?? '';
 
     return (
-        <div style={{ display: 'flex', height: '100vh' }}>
-            <aside style={{ width: 250, background: '#21222c', overflowY: 'auto', flexShrink: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <header
+                style={{
+                    height: 40,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0 16px',
+                    borderBottom: '1px solid var(--border)',
+                    background: 'var(--bg-panel)',
+                    flexShrink: 0,
+                }}
+            >
+                <Typography.Text style={{ fontSize: 13 }}>
+                    <span
+                        style={{ cursor: 'pointer', color: 'var(--text-muted)' }}
+                        onClick={() => navigate('/')}
+                    >
+                        <span style={{ color: 'var(--accent)' }}>~</span>/codestudio
+                    </span>
+                    <span style={{ color: 'var(--text-muted)' }}> / </span>
+                    {currentProject?.name ?? 'project'}
+                </Typography.Text>
                 {isOwner && (
-                    <div style={{ padding: 12 }}>
-                        <Button
-                            block
-                            icon={<ShareAltOutlined />}
-                            onClick={() => setIsShareOpen(true)}
-                        >
-                            Share
-                        </Button>
-                    </div>
+                    <Button size="small" onClick={() => setIsShareOpen(true)}>
+                        share
+                    </Button>
                 )}
-                <FileTree projectId={projectId} />
-            </aside>
+            </header>
+
+            <Group orientation="horizontal" style={{ flex: 1, minHeight: 0 }}>
+                <Panel defaultSize="250px" minSize="160px" maxSize="45%">
+                    <aside
+                        style={{
+                            height: '100%',
+                            background: 'var(--bg-panel)',
+                            overflowY: 'auto',
+                        }}
+                    >
+                        <FileTree projectId={projectId} />
+                    </aside>
+                </Panel>
+                <Separator style={{ width: 2 }} />
+
+                <Panel minSize="20%">
+                    <Group orientation="vertical" style={{ height: '100%' }}>
+                        <Panel defaultSize="70%" minSize="15%">
+                            {openFiles.length > 0 ? (
+                                <div
+                                    style={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        minWidth: 0,
+                                    }}
+                                >
+                                    <EditorTabs />
+                                    <div style={{ flex: 1, minHeight: 0 }}>
+                                        <EditorComponent
+                                            language={language}
+                                            value={editorValue}
+                                            onChange={handleEditorChange}
+                                            height="100%"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <Flex
+                                    vertical
+                                    justify="center"
+                                    align="center"
+                                    gap={8}
+                                    style={{ height: '100%' }}
+                                >
+                                    <Typography.Text strong style={{ fontSize: 18 }}>
+                                        <span style={{ color: 'var(--accent)' }}>~</span>
+                                        /codestudio
+                                    </Typography.Text>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        select a file from the tree to start editing
+                                    </Typography.Text>
+                                </Flex>
+                            )}
+                        </Panel>
+                        <Separator style={{ height: 2 }} />
+                        <Panel defaultSize="30%" minSize="10%">
+                            <BrowserTerminal />
+                        </Panel>
+                    </Group>
+                </Panel>
+                <Separator style={{ width: 2 }} />
+
+                <Panel defaultSize="35%" minSize="15%">
+                    <Preview />
+                </Panel>
+            </Group>
 
             <ShareModal
                 projectId={projectId}
                 open={isShareOpen}
                 onClose={() => setIsShareOpen(false)}
             />
-
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <EditorTabs />
-                <EditorComponent
-                    language={language}
-                    value={editorValue}
-                    onChange={handleEditorChange}
-                    height="calc(70vh - 38px)"
-                />
-                <div style={{ height: '30vh', borderTop: '1px solid #44475a' }}>
-                    <BrowserTerminal />
-                </div>
-            </main>
-
-            <aside style={{ width: '40%', borderLeft: '1px solid #44475a', flexShrink: 0 }}>
-                <Preview />
-            </aside>
         </div>
     );
 };

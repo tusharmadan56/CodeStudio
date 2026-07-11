@@ -1,47 +1,48 @@
-import { Alert, Button, Card, Form, Input, Row, Typography } from 'antd';
+import { Button, Form, Input, Typography } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useLogin } from '../hooks/apis/useLogin';
+import { AuthShell } from '../components/auth/AuthShell';
 
 export const Login = () => {
     const { mutate: login, isPending, error } = useLogin();
     const location = useLocation();
 
     return (
-        <Row justify="center" align="middle" style={{ minHeight: '100vh' }}>
-            <Card style={{ width: 380 }}>
-                <Typography.Title level={3}>Log in</Typography.Title>
-                {error && (
-                    <Alert
-                        type="error"
-                        showIcon
-                        style={{ marginBottom: 16 }}
-                        message={error.response?.data?.message ?? 'Login failed'}
-                    />
-                )}
-                <Form layout="vertical" onFinish={(values) => login(values)}>
-                    <Form.Item
-                        name="email"
-                        label="Email"
-                        rules={[{ required: true, type: 'email', message: 'Enter a valid email' }]}
-                    >
-                        <Input autoComplete="email" />
-                    </Form.Item>
-                    <Form.Item
-                        name="password"
-                        label="Password"
-                        rules={[{ required: true, message: 'Enter your password' }]}
-                    >
-                        <Input.Password autoComplete="current-password" />
-                    </Form.Item>
-                    <Button type="primary" htmlType="submit" block loading={isPending}>
-                        Log in
-                    </Button>
-                </Form>
-                <Typography.Paragraph style={{ marginTop: 16, marginBottom: 0 }}>
-                    No account? <Link to="/signup" state={location.state}>Sign up</Link>
+        <AuthShell command="login">
+            {error && (
+                <Typography.Paragraph style={{ color: '#ff5555', fontSize: 12 }}>
+                    error: {(error.response?.data?.message ?? 'login failed').toLowerCase()}
                 </Typography.Paragraph>
-            </Card>
-        </Row>
+            )}
+            <Form layout="vertical" requiredMark={false} onFinish={(values) => login(values)}>
+                <Form.Item
+                    name="email"
+                    label="email"
+                    rules={[{ required: true, type: 'email', message: 'enter a valid email' }]}
+                >
+                    <Input autoComplete="email" />
+                </Form.Item>
+                <Form.Item
+                    name="password"
+                    label="password"
+                    rules={[{ required: true, message: 'enter your password' }]}
+                >
+                    <Input.Password autoComplete="current-password" />
+                </Form.Item>
+                <Button type="primary" htmlType="submit" block loading={isPending}>
+                    log in
+                </Button>
+            </Form>
+            <Typography.Paragraph
+                type="secondary"
+                style={{ marginTop: 16, marginBottom: 0, fontSize: 12 }}
+            >
+                no account?{' '}
+                <Link to="/signup" state={location.state}>
+                    sign up
+                </Link>
+            </Typography.Paragraph>
+        </AuthShell>
     );
 };

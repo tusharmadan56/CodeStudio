@@ -7,11 +7,11 @@ export const FileTree = ({ projectId }) => {
     const { data, isLoading, isError } = useProjectTree(projectId);
 
     if (isLoading) {
-        return <div className="file-tree__status">Loading files...</div>;
+        return <div className="file-tree__status">loading files...</div>;
     }
 
     if (isError) {
-        return <div className="file-tree__status">Failed to load files</div>;
+        return <div className="file-tree__status">failed to load files</div>;
     }
 
     const tree = data?.data;

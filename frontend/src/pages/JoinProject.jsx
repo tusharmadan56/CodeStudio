@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Alert, Button, Flex, Spin } from 'antd';
+import { Button, Typography } from 'antd';
 
 import { useJoinProject } from '../hooks/apis/useJoinProject';
+import { AuthShell } from '../components/auth/AuthShell';
 
 export const JoinProject = () => {
     const { token } = useParams();
@@ -16,23 +17,24 @@ export const JoinProject = () => {
     }, [join, token]);
 
     return (
-        <Flex vertical justify="center" align="center" gap="large" style={{ minHeight: '100vh' }}>
+        <AuthShell command="join">
             {error ? (
                 <>
-                    <Alert
-                        type="error"
-                        showIcon
-                        message={error.response?.data?.message ?? 'Failed to join project'}
-                    />
+                    <Typography.Paragraph style={{ color: '#ff5555', fontSize: 12 }}>
+                        error:{' '}
+                        {(error.response?.data?.message ?? 'failed to join project').toLowerCase()}
+                    </Typography.Paragraph>
                     <Link to="/">
-                        <Button type="primary">Back to your projects</Button>
+                        <Button type="primary" block>
+                            back to your projects
+                        </Button>
                     </Link>
                 </>
             ) : (
-                <Spin size="large" tip="Joining project...">
-                    <div style={{ width: 200 }} />
-                </Spin>
+                <Typography.Text type="secondary">
+                    joining project<span className="blink">▌</span>
+                </Typography.Text>
             )}
-        </Flex>
+        </AuthShell>
     );
 };
