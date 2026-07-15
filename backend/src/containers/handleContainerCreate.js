@@ -1,11 +1,15 @@
 import Docker from 'dockerode';
 import path from 'path';
 
-import { PROJECTS_DIR } from '../config/serverConfig.js';
+import {
+    PROJECTS_DIR,
+    PREVIEW_HOST,
+    SANDBOX_MEMORY_MB,
+    SANDBOX_CPUS,
+    SANDBOX_PIDS_LIMIT,
+} from '../config/serverConfig.js';
 
 const docker = new Docker();
-
-// Remove any leftover sandbox containers — e.g. orphans from a backend that was
 
 export const cleanupSandboxContainers = async () => {
     try {
@@ -39,18 +43,21 @@ export const handleContainerCreate = async (projectId, socket) => {
         User: 'sandbox',
         HostConfig: {
             Binds: [`${hostPath}:/home/sandbox/app`],
-            PortBindings: { '5173/tcp': [{ HostPort: '' }] }, // random host port; for preview later
+            PortBindings: { '5173/tcp': [{ HostPort: '' }] }, // '' -> Docker assigns a free host port
+            Memory: SANDBOX_MEMORY_MB * 1024 * 1024,
+            MemorySwap: SANDBOX_MEMORY_MB * 2 * 1024 * 1024,
+            NanoCpus: SANDBOX_CPUS * 1e9,
+            PidsLimit: SANDBOX_PIDS_LIMIT,
         },
         ExposedPorts: { '5173/tcp': {} },
     });
 
     await container.start();
 
-    // Docker assigns a random host port to the container's 5173 — tell the frontend so it can preview.
     const info = await container.inspect();
     const hostPort = info.NetworkSettings?.Ports?.['5173/tcp']?.[0]?.HostPort;
     if (hostPort) {
-        socket.emit('preview:url', { url: `http://localhost:${hostPort}` });
+        socket.emit('preview:url', { url: `http://${PREVIEW_HOST}:${hostPort}` });
     }
 
     const exec = await container.exec({
@@ -64,8 +71,8 @@ export const handleContainerCreate = async (projectId, socket) => {
 
     const stream = await exec.start({ hijack: true, stdin: true });
 
-    socket.on('shell:input', (data) => stream.write(data)); // keystrokes -> container
-    stream.on('data', (chunk) => socket.emit('shell:output', chunk.toString())); // output -> browser
+    socket.on('shell:input', (data) => stream.write(data));
+    stream.on('data', (chunk) => socket.emit('shell:output', chunk.toString()));
 
     return container;
 };

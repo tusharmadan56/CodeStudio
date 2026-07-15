@@ -18,8 +18,11 @@ const app = express();
 const server = createServer(app);
 
 const io = new Server(server, {
-    cors: { origin: '*' },
+    cors: { origin: CLIENT_ORIGIN },
 });
+
+
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -15,3 +15,9 @@ export const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || '15m';
 export const REFRESH_TOKEN_TTL = process.env.REFRESH_TOKEN_TTL || '7d';
 
 export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+
+export const PREVIEW_HOST = process.env.PREVIEW_HOST || 'localhost';
+
+export const SANDBOX_MEMORY_MB = Number(process.env.SANDBOX_MEMORY_MB) || 512;
+export const SANDBOX_CPUS = Number(process.env.SANDBOX_CPUS) || 1;
+export const SANDBOX_PIDS_LIMIT = Number(process.env.SANDBOX_PIDS_LIMIT) || 256;
