@@ -5,10 +5,15 @@ import { v4 as uuid4 } from 'uuid';
 import directoryTree from 'directory-tree';
 
 import { execPromisified } from '../utils/execUtil.js';
-import { PROJECTS_DIR, SCAFFOLD_CMD } from '../config/serverConfig.js';
+import { PROJECTS_DIR, SCAFFOLD_CMD, PREVIEW_HMR_CLIENT_PORT } from '../config/serverConfig.js';
 import { prisma } from '../config/prismaClient.js';
 
 const SAFE_PROJECT_ID = /^[a-zA-Z0-9-]+$/;
+
+// behind the https preview proxy, the HMR websocket must target the proxy port over wss
+const HMR_CONFIG = PREVIEW_HMR_CLIENT_PORT
+    ? `\n        hmr: { clientPort: ${Number(PREVIEW_HMR_CLIENT_PORT)}, protocol: 'wss' },`
+    : '';
 
 // host:true → dev server binds 0.0.0.0 (reachable through the container port mapping)
 // strictPort+port → stays on 5173, the port we map for preview
@@ -21,7 +26,7 @@ export default defineConfig({
     server: {
         host: true,
         port: 5173,
-        strictPort: true,
+        strictPort: true,${HMR_CONFIG}
         watch: { usePolling: true },
     },
 });

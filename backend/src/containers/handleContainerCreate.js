@@ -3,7 +3,7 @@ import path from 'path';
 
 import {
     PROJECTS_DIR,
-    PREVIEW_HOST,
+    PREVIEW_URL_TEMPLATE,
     SANDBOX_MEMORY_MB,
     SANDBOX_CPUS,
     SANDBOX_PIDS_LIMIT,
@@ -57,7 +57,7 @@ export const handleContainerCreate = async (projectId, socket) => {
     const info = await container.inspect();
     const hostPort = info.NetworkSettings?.Ports?.['5173/tcp']?.[0]?.HostPort;
     if (hostPort) {
-        socket.emit('preview:url', { url: `http://${PREVIEW_HOST}:${hostPort}` });
+        socket.emit('preview:url', { url: PREVIEW_URL_TEMPLATE.replace('{{port}}', hostPort) });
     }
 
     const exec = await container.exec({

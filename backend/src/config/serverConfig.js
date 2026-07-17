@@ -16,7 +16,9 @@ export const REFRESH_TOKEN_TTL = process.env.REFRESH_TOKEN_TTL || '7d';
 
 export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
-export const PREVIEW_HOST = process.env.PREVIEW_HOST || 'localhost';
+export const PREVIEW_URL_TEMPLATE =
+    process.env.PREVIEW_URL_TEMPLATE || 'http://localhost:{{port}}';
+export const PREVIEW_HMR_CLIENT_PORT = process.env.PREVIEW_HMR_CLIENT_PORT || '';
 
 export const SANDBOX_MEMORY_MB = Number(process.env.SANDBOX_MEMORY_MB) || 512;
 export const SANDBOX_CPUS = Number(process.env.SANDBOX_CPUS) || 1;
