@@ -17,5 +17,41 @@ services:
       timeout: 5s
       retries: 5
 
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: codestudio-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+    extra_hosts:
+      - 'host.docker.internal:host-gateway' # the backend runs on the host, not in compose
+    ports:
+      - '127.0.0.1:9090:9090' # never public — reach it over an ssh tunnel
+    mem_limit: 256m
+
+  grafana:
+    image: grafana/grafana:11.5.1
+    container_name: codestudio-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - grafanadata:/var/lib/grafana
+      - ./monitoring/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./monitoring/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/dashboard.json:/var/lib/grafana/dashboards/codestudio.json:ro
+    ports:
+      - '127.0.0.1:3001:3000'
+    mem_limit: 256m
+
 volumes:
   pgdata:
+  promdata:
+  grafanadata:

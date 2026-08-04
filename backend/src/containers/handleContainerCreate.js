@@ -8,8 +8,32 @@ import {
     SANDBOX_CPUS,
     SANDBOX_PIDS_LIMIT,
 } from '../config/serverConfig.js';
+import { sandboxSpawnSeconds, sandboxOomKills } from '../config/metrics.js';
 
 const docker = new Docker();
+
+
+export const watchSandboxOomKills = async () => {
+    try {
+        const stream = await docker.getEvents({
+            filters: { type: ['container'], event: ['oom'] },
+        });
+        stream.on('data', (buffer) => {
+            for (const line of buffer.toString().split('\n')) {
+                if (!line.trim()) continue;
+                try {
+                    if (JSON.parse(line)?.Actor?.Attributes?.image === 'sandbox') {
+                        sandboxOomKills.inc();
+                    }
+                } catch {
+                    // the next chunk carries the rest
+                }
+            }
+        });
+    } catch (error) {
+        console.log('Could not subscribe to docker events', error);
+    }
+};
 
 export const cleanupSandboxContainers = async () => {
     try {
@@ -29,6 +53,8 @@ export const cleanupSandboxContainers = async () => {
 };
 
 export const handleContainerCreate = async (projectId, socket) => {
+    const stopSpawnTimer = sandboxSpawnSeconds.startTimer();
+
     // Mount the actual app folder (projects/<id>/<id>) so package.json sits at the workdir.
     const hostPath = path.resolve(PROJECTS_DIR, projectId, projectId);
 
@@ -70,6 +96,7 @@ export const handleContainerCreate = async (projectId, socket) => {
     });
 
     const stream = await exec.start({ hijack: true, stdin: true });
+    stopSpawnTimer(); // the shell is attached — this is what the user waits for
 
     socket.on('shell:input', (data) => stream.write(data));
     stream.on('data', (chunk) => socket.emit('shell:output', chunk.toString()));

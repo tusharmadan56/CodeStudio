@@ -11,8 +11,13 @@ import projectRoutes from './routes/projectRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import shareRoutes from './routes/shareRoutes.js';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
-import { handleContainerCreate, cleanupSandboxContainers } from './containers/handleContainerCreate.js';
+import {
+    handleContainerCreate,
+    cleanupSandboxContainers,
+    watchSandboxOomKills,
+} from './containers/handleContainerCreate.js';
 import { requireSocketProjectAccess } from './middlewares/socketAuthMiddleware.js';
+import { register, activeSandboxes, sandboxSpawnFailures } from './config/metrics.js';
 
 const app = express();
 const server = createServer(app);
@@ -26,11 +31,17 @@ app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: CLIENT_ORIGIN, credentials: true })); // credentials: allow the refresh-token cookie cross-origin
+app.use(cors({ origin: CLIENT_ORIGIN, credentials: true })); 
 app.use(cookieParser());
 
 app.get('/ping', (req, res) => {
     return res.json({ message: 'pong' });
+});
+
+// Not proxied by nginx  reachable from the host and the metrics containers only.
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType);
+    return res.send(await register.metrics());
 });
 
 app.use('/api/v1/auth', authRoutes);
@@ -94,6 +105,7 @@ terminalNamespace.on('connection', async (socket) => {
             console.log('Error removing the container', error);
         }
         container = undefined;
+        activeSandboxes.dec();
     };
 
     // Register cleanup first so a disconnect during container startup isn't missed
@@ -106,8 +118,10 @@ terminalNamespace.on('connection', async (socket) => {
 
     try {
         container = await handleContainerCreate(projectId, socket);
+        activeSandboxes.inc();
         if (disconnected) await removeContainer(); // socket already left while starting up
     } catch (error) {
+        sandboxSpawnFailures.inc();
         console.log('Error creating the container', error);
     }
 });
@@ -115,4 +129,5 @@ terminalNamespace.on('connection', async (socket) => {
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
     await cleanupSandboxContainers();
+    watchSandboxOomKills();
 });

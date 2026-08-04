@@ -1,0 +1,103 @@
+{
+  "uid": "codestudio-sandboxes",
+  "title": "CodeStudio — Sandboxes",
+  "tags": ["codestudio"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active sandboxes",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "codestudio_active_sandboxes", "legendFormat": "running" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "color": { "mode": "thresholds" } },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Memory-limit kills (total)",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "codestudio_sandbox_oom_kills_total", "legendFormat": "oom kills" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "stat",
+      "title": "Spawn failures (total)",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "codestudio_sandbox_spawn_failures_total", "legendFormat": "failures" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "stat",
+      "title": "Sandboxes spawned (total)",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "codestudio_sandbox_spawn_seconds_count", "legendFormat": "spawned" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Sandbox spawn latency",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum(rate(codestudio_sandbox_spawn_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum(rate(codestudio_sandbox_spawn_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active sandboxes over time",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "codestudio_active_sandboxes", "legendFormat": "running" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0 }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend memory (resident)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "process_resident_memory_bytes", "legendFormat": "rss" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Event loop lag (p99)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "nodejs_eventloop_lag_p99_seconds", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    }
+  ]
+}
