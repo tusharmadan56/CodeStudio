@@ -76,6 +76,8 @@ export const ProjectPlayground = () => {
         editorSocket.on('deleteFileSuccess', handleDeleteSuccess);
         editorSocket.on('createFolderSuccess', refreshTree);
         editorSocket.on('deleteFolderSuccess', handleDeleteSuccess);
+        // changes made outside the editor (terminal, git) reach us only through the watcher
+        editorSocket.on('tree:changed', refreshTree);
 
         return () => {
             editorSocket.off('readFileSuccess', handleReadFileSuccess);
@@ -84,6 +86,7 @@ export const ProjectPlayground = () => {
             editorSocket.off('deleteFileSuccess', handleDeleteSuccess);
             editorSocket.off('createFolderSuccess', refreshTree);
             editorSocket.off('deleteFolderSuccess', handleDeleteSuccess);
+            editorSocket.off('tree:changed', refreshTree);
         };
     }, [editorSocket, setFileContent, closeFilesUnder, queryClient, projectId]);
 

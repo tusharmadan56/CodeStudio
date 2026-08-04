@@ -44,6 +44,7 @@ editorNamespace.on('connection', (socket) => {
 
     const projectId = socket.handshake.query.projectId;
     let watcher;
+    let treeChangeTimer;
 
     if (projectId) {
         watcher = chokidar.watch(path.join(PROJECTS_DIR, projectId), {
@@ -53,8 +54,10 @@ editorNamespace.on('connection', (socket) => {
             ignoreInitial: true,
         });
 
-        watcher.on('all', (event, filePath) => {
-            console.log('File event:', event, filePath);
+        
+        watcher.on('all', () => {
+            clearTimeout(treeChangeTimer);
+            treeChangeTimer = setTimeout(() => socket.emit('tree:changed'), 300);
         });
     }
 
@@ -62,6 +65,7 @@ editorNamespace.on('connection', (socket) => {
 
     socket.on('disconnect', async () => {
         console.log('Editor socket disconnected', socket.id);
+        clearTimeout(treeChangeTimer);
         if (watcher) {
             await watcher.close();
         }
