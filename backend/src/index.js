@@ -47,6 +47,9 @@ editorNamespace.on('connection', (socket) => {
     let treeChangeTimer;
 
     if (projectId) {
+        
+        socket.join(projectId);
+
         watcher = chokidar.watch(path.join(PROJECTS_DIR, projectId), {
             ignored: (filePath) => filePath.includes('node_modules'),
             persistent: true,
@@ -80,6 +83,8 @@ terminalNamespace.on('connection', async (socket) => {
     const projectId = socket.handshake.query.projectId;
     let container;
     let disconnected = false;
+
+    if (projectId) socket.join(projectId);
 
     const removeContainer = async () => {
         if (!container) return;
