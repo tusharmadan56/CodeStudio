@@ -6,8 +6,9 @@ import { useEditorSocketStore } from '../../../store/editorSocketStore';
 import { useContextMenuStore } from '../../../store/contextMenuStore';
 import { FileIcon } from '../../../utils/getFileIcon';
 
-export const TreeNode = ({ node }) => {
-    const [expanded, setExpanded] = useState(false);
+export const TreeNode = ({ node, depth = 0 }) => {
+    
+    const [expanded, setExpanded] = useState(depth === 0);
     const openFile = useEditorStore((state) => state.openFile);
     const activeFile = useEditorStore((state) => state.activeFile);
     const editorSocket = useEditorSocketStore((state) => state.editorSocket);
@@ -56,7 +57,7 @@ export const TreeNode = ({ node }) => {
             {isFolder && expanded && (
                 <div className="tree-node__children">
                     {node.children.map((child) => (
-                        <TreeNode key={child.path} node={child} />
+                        <TreeNode key={child.path} node={child} depth={depth + 1} />
                     ))}
                 </div>
             )}

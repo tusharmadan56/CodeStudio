@@ -75,5 +75,19 @@ export const getProjectTreeService = async (projectId) => {
         return null;
     }
 
-    return directoryTree(projectPath);
+    const tree = directoryTree(projectPath);
+    if (!tree) {
+        return null;
+    }
+
+    
+    const isWrapper = tree.children?.length === 1 && Array.isArray(tree.children[0].children);
+    const root = isWrapper ? tree.children[0] : tree;
+
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { name: true },
+    });
+
+    return { ...root, name: project?.name ?? root.name };
 };

@@ -20,6 +20,8 @@ services:
   prometheus:
     image: prom/prometheus:v3.1.0
     container_name: codestudio-prometheus
+    # opt-in only plain ocker compose up -d never start these on the VM
+    profiles: ['monitoring']
     restart: unless-stopped
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -36,6 +38,7 @@ services:
   grafana:
     image: grafana/grafana:11.5.1
     container_name: codestudio-grafana
+    profiles: ['monitoring']
     restart: unless-stopped
     depends_on:
       - prometheus
